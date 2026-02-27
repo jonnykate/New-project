@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Applicant Qualification Expert System (Python)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Applicant Qualification Expert System</h1>
+      <p>Answer each question exactly as requested. Required fields are marked with *.</p>
+
+      <form method="post" class="panel">
+        <div class="form-grid">
+          <section class="section-card">
+            <h2>Education and Certifications</h2>
+
+            <label for="degree">CS Degree *</label>
+            <select id="degree" name="degree" required>
+              <option value="">Select an option</option>
+              {% for degree in allowed_degrees %}
+              <option value="{{ degree }}" {% if form_data.degree == degree %}selected{% endif %}>{{ degree }}</option>
+              {% endfor %}
+            </select>
+            <small class="hint">Choose one of the listed options.</small>
+
+            <label for="certification">Project Management Certification *</label>
+            <select id="certification" name="certification" required>
+              <option value="">Select an option</option>
+              {% for cert in allowed_certs %}
+              <option value="{{ cert }}" {% if form_data.certification == cert %}selected{% endif %}>{{ cert }}</option>
+              {% endfor %}
+            </select>
+            <small class="hint">Choose one of the listed options.</small>
+
+            <div class="checkbox-grid">
+              <label>
+                <input type="checkbox" name="python_coursework" {% if form_data.python_coursework %}checked{% endif %} />
+                Completed Python course work
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="software_eng_coursework"
+                  {% if form_data.software_eng_coursework %}checked{% endif %}
+                />
+                Completed Software Engineering course work
+              </label>
+              <label>
+                <input type="checkbox" name="agile_course" {% if form_data.agile_course %}checked{% endif %} />
+                Completed Agile course
+              </label>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <h2>Professional Experience</h2>
+            <p class="hint">If you have no experience in a category, enter <strong>0</strong>.</p>
+
+            <label for="python_years">Years of Python development *</label>
+            <input id="python_years" name="python_years" type="number" min="0" max="100" step="1" value="{{ form_data.python_years }}" required />
+
+            <label for="data_dev_years">Years of data development *</label>
+            <input id="data_dev_years" name="data_dev_years" type="number" min="0" max="100" step="1" value="{{ form_data.data_dev_years }}" required />
+
+            <label for="agile_project_years">Years of Agile project experience *</label>
+            <input
+              id="agile_project_years"
+              name="agile_project_years"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value="{{ form_data.agile_project_years }}"
+              required
+            />
+
+            <label for="manage_years">Years managing software projects *</label>
+            <input id="manage_years" name="manage_years" type="number" min="0" max="100" step="1" value="{{ form_data.manage_years }}" required />
+
+            <label for="expert_system_years">Years developing Expert Systems *</label>
+            <input
+              id="expert_system_years"
+              name="expert_system_years"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value="{{ form_data.expert_system_years }}"
+              required
+            />
+
+            <label for="data_arch_years">Years in data architecture and data development *</label>
+            <input id="data_arch_years" name="data_arch_years" type="number" min="0" max="100" step="1" value="{{ form_data.data_arch_years }}" required />
+
+            <label class="single-check">
+              <input type="checkbox" name="used_git" {% if form_data.used_git %}checked{% endif %} /> Used Git
+            </label>
+          </section>
+        </div>
+
+        {% if errors %}
+        <div class="errors" role="alert">
+          <ul class="result-list">
+            {% for err in errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <button type="submit">Evaluate Qualifications</button>
+      </form>
+
+      {% if qualified or not_qualified %}
+      <section class="panel">
+        <h2>Evaluation Result</h2>
+
+        <h3>Qualified Position(s)</h3>
+        {% if qualified %}
+        <ul class="result-list success">
+          {% for p in qualified %}
+          <li>
+            <strong>{{ p.title }}</strong>
+            {% if p.met_desired %}
+            (Desired skills met: {{ p.met_desired | join(', ') }})
+            {% endif %}
+            {% if p.unmet_desired %}
+            <div class="desired-note">Note: Desired skills not met: {{ p.unmet_desired | join(', ') }}.</div>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="failure">No positions qualified.</p>
+        {% endif %}
+
+        <h3>Not Qualified Position(s) and Reasons</h3>
+        {% if not_qualified %}
+        {% for p in not_qualified %}
+        <div class="position-card failure">
+          <strong>{{ p.title }}</strong>
+          <p>Disqualified because:</p>
+          <ul class="result-list">
+            {% for reason in p.unmet %}
+            <li>{{ reason }}</li>
+            {% endfor %}
+          </ul>
+          {% if p.unmet_desired %}
+          <p class="desired-note">Note: Desired skills not met: {{ p.unmet_desired | join(', ') }}.</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="success">Applicant qualifies for all positions.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
